@@ -4,8 +4,8 @@
 https://andrkhalzov.github.io/shfe-diplom/
 
 ## Логин / пароль от администраторской части
-login: shfe-diplom@netology.ru
-password: shfe-diplom
+- login: shfe-diplom@netology.ru
+- password: shfe-diplom
 
 ## 💻 Стэк технологий:
 - HTML
