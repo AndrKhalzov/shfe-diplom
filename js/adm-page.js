@@ -1,5 +1,5 @@
 // обработка кликов по стрелкам заголовков секций -> сворачивание / разворачивание блоков
-document.querySelectorAll(".admin-section__toggle").forEach(strelka => {
+document.querySelectorAll(".admin-section__toggle").forEach((strelka) => {
   strelka.onclick = () => {
     const zagolovok = strelka.closest(".admin-section__header");
     const obertka = zagolovok?.nextElementSibling;
@@ -9,39 +9,40 @@ document.querySelectorAll(".admin-section__toggle").forEach(strelka => {
 });
 
 // закрытие и отмена popup
-const okna = [...document.querySelectorAll(".popup")]; 
-const knopkiZakrytiya = [...document.querySelectorAll(".popup__close")]; 
-const formy = [...document.querySelectorAll(".popup__form")]; 
-const knopkiOtmeny = [...document.querySelectorAll(".button--cancel")]; 
+document.querySelectorAll(".popup").forEach((popup) => {
+  const closeBtn = popup.querySelector(".popup__close");
+  const cancelBtn = popup.querySelector(".button--cancel");
+  const form = popup.querySelector(".popup__form");
 
-for (const okno of okna) {
-  for (const closeBtn of knopkiZakrytiya) {
-    //"крестик" — скрыть окно
-    closeBtn.addEventListener("click", () => {
-      okno.classList.add("popup--hidden");
-    });
-  }
-  for (const form of formy) {
-    for (const cancelBtn of knopkiOtmeny) {
-      // "отмена" — сбросить форму и скрыть окно
-      cancelBtn.onclick = () => {
-        form.reset();
-        okno.classList.add("popup--hidden");
-      };
-    }
-  }
-}
+  // закрытие по крестику
+  closeBtn?.addEventListener("click", () => {
+    popup.classList.add("popup--hidden");
+  });
+
+  // закрытие по кнопке
+  cancelBtn?.addEventListener("click", () => {
+    form?.reset();
+    popup.classList.add("popup--hidden");
+  });
+});
 
 // загрузка данных с сервера
-(async () => {
+
+async function poluchitDannye(callHandlers = true) {
   try {
     const response = await fetch("https://shfe-diplom.neto-server.ru/alldata");
     const data = await response.json();
-    //запуск обработчиков для залов / фильмов / сеансов
+
+    // запуск при инициализации
     operaciiZalov(data);
     operaciiFilmov(data);
     operaciiSeansov(data);
   } catch (error) {
     console.error("Ошибка при загрузке данных:", error);
+    return null;
   }
+}
+
+(async () => {
+  await poluchitDannye();
 })();

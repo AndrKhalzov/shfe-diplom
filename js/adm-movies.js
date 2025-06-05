@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   const addMovieBtn = document.querySelector(".button--add-movie");
   const moviesContainer = document.querySelector(".movies-grid");
 
@@ -14,10 +14,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // элементы формы добавления фильма
   const formElements = {
     addMovieForm: document.querySelector(".popup--add-movie .popup__form"),
-    movieNameInput: document.querySelector(".popup--add-movie input[type='text']"),
-    movieTimeInput: document.querySelector(".popup--add-movie input[type='number']"),
+    movieNameInput: document.querySelector(
+      ".popup--add-movie input[type='text']"
+    ),
+    movieTimeInput: document.querySelector(
+      ".popup--add-movie input[type='number']"
+    ),
     movieSynopsisInput: document.querySelector(".popup--add-movie textarea"),
-    movieCountryInput: document.querySelectorAll(".popup--add-movie input[type='text']")[1],
+    movieCountryInput: document.querySelectorAll(
+      ".popup--add-movie input[type='text']"
+    )[1],
     uploadPosterBtn: document.querySelector(".popup__file-input"),
   };
 
@@ -26,43 +32,50 @@ document.addEventListener('DOMContentLoaded', () => {
   // созданиt FormData для отправки на сервер
   const createFormData = () => {
     const formData = new FormData();
-    const duration = Number(formElements.movieTimeInput.value);
+    const duration = Math.max(1, Number(formElements.movieTimeInput.value));
 
     // pаполняем форму данными фильма
     formData.set("filmName", formElements.movieNameInput.value);
     formData.set("filmDuration", duration);
     formData.set("filmDescription", formElements.movieSynopsisInput.value);
     formData.set("filmOrigin", formElements.movieCountryInput.value);
-    if (posterFile) formData.set("filePoster", posterFile); 
+    if (posterFile) formData.set("filePoster", posterFile);
     return formData;
   };
 
   // функция для добавления фильма
   const addMovie = (posterFile) => {
-    const formData = createFormData(); 
+    const formData = createFormData();
     fetch("https://shfe-diplom.neto-server.ru/film", {
       method: "POST",
-      body: formData
+      body: formData,
     })
-      .then(response => response.json())
+      .then((response) => response.json())
       .then(() => {
-        alert(`Фильм ${formElements.movieNameInput.value} добавлен!`); 
-        location.reload(); 
+        alert(`Фильм ${formElements.movieNameInput.value} добавлен!`);
       })
-      .catch(console.error); 
+      .then(async () => {
+        const updatedData = await poluchitDannye(false);
+        if (updatedData) operaciiFilmov(updatedData);
+      })
+      .then(() => location.reload())
+      .catch(console.error);
   };
 
   // функция для удаления фильма по ID
   const deleteMovie = (movieId) => {
     fetch(`https://shfe-diplom.neto-server.ru/film/${movieId}`, {
-      method: "DELETE", 
+      method: "DELETE",
     })
-    .then(response => response.json()) 
-    .then(() => {
-      alert("Фильм удален!"); 
-      location.reload(); 
-    })
-    .catch(console.error); 
+      .then((response) => response.json())
+      .then(() => {
+        alert("Фильм удален!");
+      })
+      .then(async () => {
+        const updatedData = await poluchitDannye(false);
+        if (updatedData) operaciiFilmov(updatedData);
+      })
+      .catch(console.error);
   };
 
   // валидация выбранного постера
@@ -70,41 +83,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const file = event.target.files?.[0];
     if (file) {
       const fileSize = file.size;
-      if (fileSize > 3000000) { 
+      if (fileSize > 3000000) {
         alert("Размер файла должен быть не более 3 Mb!");
       } else {
-        posterFile = file; 
+        posterFile = file;
       }
     }
   };
 
   //отправка формы добавления фильма
   const handleAddMovieFormSubmit = (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     if (!posterFile) {
-      alert("Загрузите постер!"); 
+      alert("Загрузите постер!");
       return;
     }
-    addMovie(posterFile); 
+    addMovie(posterFile);
   };
 
   // клики на удаление фильма
   const handleMovieDelete = (e) => {
-    if (e.target.classList.contains("movie-item__delete")) { 
+    if (e.target.classList.contains("movie-item__delete")) {
       const movieItem = e.target.closest(".movie-item");
       const movieId = movieItem?.dataset.id;
       if (movieId && confirm("Вы действительно хотите удалить этот фильм?")) {
-        deleteMovie(movieId); 
+        deleteMovie(movieId);
       }
     }
   };
 
   // функция для рендеринга списка фильмов на странице
   const renderMovies = (data) => {
-    if (!moviesContainer) return; 
+    if (!moviesContainer) return;
 
-    moviesContainer.innerHTML = ""; 
-    let movieCounter = 1; 
+    moviesContainer.innerHTML = "";
+    let movieCounter = 1;
 
     // добавляем его в контейнер
     data.result.films.forEach((film) => {
@@ -118,8 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="button--remove movie-item__delete"></span>
         </div>
       `;
-      moviesContainer.insertAdjacentHTML("beforeend", movieItemHTML); 
-      movieCounter = movieCounter > 5 ? 1 : movieCounter + 1; 
+      moviesContainer.insertAdjacentHTML("beforeend", movieItemHTML);
+      movieCounter = movieCounter > 5 ? 1 : movieCounter + 1;
     });
   };
 
@@ -128,8 +141,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // для загрузки постера и отправки формы
   formElements.uploadPosterBtn?.addEventListener("change", validatePoster);
-  formElements.addMovieForm?.addEventListener("submit", handleAddMovieFormSubmit);
+  formElements.addMovieForm?.addEventListener(
+    "submit",
+    handleAddMovieFormSubmit
+  );
 
   // для удаления
   moviesContainer?.addEventListener("click", handleMovieDelete);
+
+  formElements.movieTimeInput.addEventListener("input", () => {
+    if (Number(formElements.movieTimeInput.value) < 0) {
+      formElements.movieTimeInput.value = 1;
+    }
+  });
 });

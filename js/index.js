@@ -8,7 +8,11 @@ let kolichestvoDney = 1;
 let tekushayaNedelyaNavigacii, tekushayaDataNavigacii;
 const dniNedeli = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
 const tekushiyDen = new Date(); // уст. сегодн. даты
-let segodnyaDenNedeli, proverennayaData, vybrannayaData, vybrannyyMesyac, vybrannyyGod;
+let segodnyaDenNedeli,
+  proverennayaData,
+  vybrannayaData,
+  vybrannyyMesyac,
+  vybrannyyGod;
 let poluchennayaData, poluchennyyMesyac, data;
 let otsortirovannyeDniNavigacii;
 let idSeansa;
@@ -17,14 +21,15 @@ const osnova = document.querySelector(".main-content");
 let filmy, film, seansyFilma, spisokSeansovFilma;
 
 // действия на вход в админку
-knopkaVkhoda.onclick = e => {
+knopkaVkhoda.onclick = (e) => {
   e.preventDefault();
   location.href = "adm-entrance.html";
 };
 
 function ustanovitSegodnya(d) {
   segodnyaDenNedeli = dniNedeli[d.getDay()];
-  tekushayaNedelyaNavigacii = navigaciyaSegodnya.querySelector(".date-nav__weekday");
+  tekushayaNedelyaNavigacii =
+    navigaciyaSegodnya.querySelector(".date-nav__weekday");
   tekushayaNedelyaNavigacii.textContent = `${segodnyaDenNedeli}, `;
 
   tekushayaDataNavigacii = navigaciyaSegodnya.querySelector(".date-nav__day");
@@ -38,24 +43,36 @@ function ustanovitSegodnya(d) {
 
 function ustanovitDni() {
   dniNavigacii.forEach((day, i) => {
-    if (!day.classList.contains("date-nav__item--current") && !day.classList.contains("date-nav__item--arrow")) {
+    if (
+      !day.classList.contains("date-nav__item--current") &&
+      !day.classList.contains("date-nav__item--arrow")
+    ) {
       const d = new Date(tekushiyDen.getTime() + 86400000 * i);
       day.dataset.date = d.toISOString().split("T")[0];
       day.firstElementChild.textContent = `${dniNedeli[d.getDay()]},`;
       day.lastElementChild.textContent = d.getDate();
-      day.classList.toggle("date-nav__item--weekend", /Сб|Вс/.test(day.firstElementChild.textContent));
+      day.classList.toggle(
+        "date-nav__item--weekend",
+        /Сб|Вс/.test(day.firstElementChild.textContent)
+      );
     }
   });
 }
 
 function smenaDney(offset) {
   dniNavigacii.forEach((day, i) => {
-    if (!day.classList.contains("date-nav__item--current") && !day.classList.contains("date-nav__item--arrow")) {
+    if (
+      !day.classList.contains("date-nav__item--current") &&
+      !day.classList.contains("date-nav__item--arrow")
+    ) {
       const d = new Date(tekushiyDen.getTime() + 86400000 * (i + offset));
       day.dataset.date = d.toISOString().split("T")[0];
       day.firstElementChild.textContent = `${dniNedeli[d.getDay()]},`;
       day.lastElementChild.textContent = d.getDate();
-      day.classList.toggle("date-nav__item--weekend", /Сб|Вс/.test(day.firstElementChild.textContent));
+      day.classList.toggle(
+        "date-nav__item--weekend",
+        /Сб|Вс/.test(day.firstElementChild.textContent)
+      );
     }
   });
 }
@@ -67,7 +84,9 @@ function poluchitDen(d, m, y) {
 }
 
 function sortirovkaDney(list) {
-  otsortirovannyeDniNavigacii = list.filter(el => !el.classList.contains("date-nav__item--arrow"));
+  otsortirovannyeDniNavigacii = list.filter(
+    (el) => !el.classList.contains("date-nav__item--arrow")
+  );
 }
 
 navigaciyaSegodnya.classList.add("date-nav__item--checked");
@@ -91,7 +110,10 @@ strelkaNavigaciiVpravo.onclick = () => {
   kolichestvoDney++;
 
   navigaciyaSegodnya.classList.remove("date-nav__item--checked");
-  navigaciyaSegodnya.classList.add("date-nav__item--arrow", "date-nav__item--left");
+  navigaciyaSegodnya.classList.add(
+    "date-nav__item--arrow",
+    "date-nav__item--left"
+  );
   navigaciyaSegodnya.style.cursor = "pointer";
   navigaciyaSegodnya.style.display = "flex";
   navigaciyaSegodnya.innerHTML = `<span class="date-nav__arrow">&lt;</span>`;
@@ -104,21 +126,26 @@ navigaciyaSegodnya.onclick = () => {
   if (!navigaciyaSegodnya.classList.contains("date-nav__item--arrow")) return;
 
   kolichestvoDney--;
-  if (kolichestvoDney < 0) return;
+  if (kolichestvoDney < 0) {
+    kolichestvoDney = 0;
+    return;
+  }
 
   if (kolichestvoDney === 0) {
-    navigaciyaSegodnya.classList.remove("date-nav__item--arrow", "date-nav__item--left");
+    navigaciyaSegodnya.classList.remove(
+      "date-nav__item--arrow",
+      "date-nav__item--left"
+    );
     navigaciyaSegodnya.style.display = "block";
     navigaciyaSegodnya.innerHTML = `
       <span class="date-nav__today">Сегодня</span><br>
       <span class="date-nav__weekday"></span> <span class="date-nav__day"></span>
     `;
 
-
     ustanovitSegodnya(tekushiyDen);
     ustanovitDni();
 
-    dniNavigacii.forEach(day => {
+    dniNavigacii.forEach((day) => {
       if (!day.classList.contains("date-nav__item--checked")) {
         navigaciyaSegodnya.classList.add("date-nav__item--checked");
         navigaciyaSegodnya.style.cursor = "default";
@@ -138,9 +165,9 @@ navigaciyaSegodnya.onclick = () => {
 
 // выбрать день
 
-otsortirovannyeDniNavigacii.forEach(day => {
+otsortirovannyeDniNavigacii.forEach((day) => {
   day.addEventListener("click", () => {
-    otsortirovannyeDniNavigacii.forEach(el => {
+    otsortirovannyeDniNavigacii.forEach((el) => {
       el.classList.remove("date-nav__item--checked");
       el.style.cursor = "pointer";
     });
@@ -165,30 +192,38 @@ otsortirovannyeDniNavigacii.forEach(day => {
 let dannyeFilmy, dannyeSeansy, dannyeZaly, seansyZalov, tekushieSeansy;
 
 function poluchitFilmy(data) {
-  ({ films: dannyeFilmy, seances: dannyeSeansy, halls: dannyeZaly } = data.result);
-  dannyeZaly = dannyeZaly.filter(z => z.hall_open);
+  ({
+    films: dannyeFilmy,
+    seances: dannyeSeansy,
+    halls: dannyeZaly,
+  } = data.result);
+  dannyeZaly = dannyeZaly.filter((z) => z.hall_open);
 
-  dannyeFilmy.forEach(film => {
+  dannyeFilmy.forEach((film) => {
     seansyZalov = "";
 
-    dannyeZaly.forEach(hall => {
-      tekushieSeansy = dannyeSeansy.filter(s =>
-        +s.seance_hallid === +hall.id && +s.seance_filmid === +film.id
-      ).sort((a, b) => a.seance_time.localeCompare(b.seance_time));
+    dannyeZaly.forEach((hall) => {
+      tekushieSeansy = dannyeSeansy
+        .filter(
+          (s) => +s.seance_hallid === +hall.id && +s.seance_filmid === +film.id
+        )
+        .sort((a, b) => a.seance_time.localeCompare(b.seance_time));
 
       if (tekushieSeansy.length > 0) {
         seansyZalov += `<h3 class="movie-seances__hall" data-hallid="${hall.id}">${hall.hall_name}</h3><ul class="movie-seances__list">`;
-        tekushieSeansy.forEach(s => {
+        tekushieSeansy.forEach((s) => {
           seansyZalov += `<li class="movie-seances__time" data-seanceid="${s.id}" data-hallid="${hall.id}" data-filmid="${film.id}">${s.seance_time}</li>`;
         });
         seansyZalov += `</ul>`;
       }
     });
 
-// секция с фильмами
+    // секция с фильмами
 
     if (seansyZalov) {
-      osnova.insertAdjacentHTML("beforeend", `
+      osnova.insertAdjacentHTML(
+        "beforeend",
+        `
         <section class="movie" data-filmid="${film.id}">
           <div class="movie__info">
             <div class="movie__poster">
@@ -205,7 +240,8 @@ function poluchitFilmy(data) {
           </div>
           <div class="movie-seances">${seansyZalov}</div>
         </section>
-      `);
+      `
+      );
     }
   });
 
@@ -214,14 +250,15 @@ function poluchitFilmy(data) {
 }
 
 fetch("https://shfe-diplom.neto-server.ru/alldata")
-  .then(r => r.json())
+  .then((r) => r.json())
   .then(poluchitFilmy);
 
 function otmetitProshlyeSeansy() {
-  const h = tekushiyDen.getHours(), m = tekushiyDen.getMinutes();
+  const h = tekushiyDen.getHours(),
+    m = tekushiyDen.getMinutes();
   spisokSeansovFilma = document.querySelectorAll(".movie-seances__time");
 
-  spisokSeansovFilma.forEach(seance => {
+  spisokSeansovFilma.forEach((seance) => {
     const [hr, min] = seance.textContent.trim().split(":").map(Number);
     const sameDay = +vybrannayaData === tekushiyDen.getDate();
 
@@ -238,13 +275,15 @@ function otmetitProshlyeSeansy() {
 function klikSeansa() {
   spisokSeansovFilma = document.querySelectorAll(".movie-seances__time");
 
-  spisokSeansovFilma.forEach(seance => {
+  spisokSeansovFilma.forEach((seance) => {
     if (!seance.classList.contains("movie-seances__time--disabled")) {
       seance.onclick = () => {
         idSeansa = seance.dataset.seanceid;
         localStorage.setItem("seanceId", idSeansa);
         location.href = "./cinema-hall.html";
       };
+    } else {
+      seance.onclick = null;
     }
   });
 }

@@ -33,7 +33,9 @@ formaPriceKonfig = document.querySelector(".price-config__form");
 const priceInputs = document.querySelectorAll(".price-config__input");
 priceStandartKonfig = priceInputs[0];
 priceVipKonfig = priceInputs[1];
-otmenaCenaKonfiguraciya = document.querySelector(".price-config__batton_cancel");
+otmenaCenaKonfiguraciya = document.querySelector(
+  ".price-config__batton_cancel"
+);
 savePriceKonfig = document.querySelector(".price-config__batton_save");
 
 const openProdazhu = document.querySelector(".admin-section--sales");
@@ -58,7 +60,7 @@ function proverkaSpisokZalov() {
     openProdazhu,
   ];
 
-  const deystvie = zalyList.innerText.trim() ? 'remove' : 'add';
+  const deystvie = zalyList.innerText.trim() ? "remove" : "add";
 
   // применяем нужное действие (скрыть / удалить) ко всем элементам
   vidimyeElementy.forEach((el) => el.classList[deystvie]("hidden"));
@@ -73,9 +75,12 @@ const formaDobavitZal = document.querySelector(".popup__form");
 const vvodDobavitZal = document.querySelector(".popup__input");
 const knopkaDobavitZal = document.querySelector(".button--confirm");
 
-formaDobavitZal.addEventListener("submit", (e) => {
+formaDobavitZal.addEventListener("submit", async (e) => {
   e.preventDefault();
   processForm(vvodDobavitZal);
+  const updatedData = await poluchitDannye(false);
+  if (updatedData) operaciiZalov(updatedData);
+  location.reload();
 });
 
 // функция для обработки добавления зала
@@ -123,7 +128,6 @@ function addHallToList(hallId, hallName) {
 // сброс формы
 function resetForm(inputField) {
   inputField.value = "";
-  location.reload();
 }
 
 function udalitZal(hallId) {
@@ -133,13 +137,23 @@ function udalitZal(hallId) {
     .then((response) => response.json())
     .then(function (data) {
       console.log(data);
-      location.reload();
+    })
+    .then(async () => {
+      const updatedData = await poluchitDannye(false);
+      if (updatedData) operaciiZalov(updatedData);
     });
 }
 
 function pokazatZal(data, currentZalKonfigIndex) {
-  if (!data || !data.result || !data.result.halls || !Array.isArray(data.result.halls[currentZalKonfigIndex].hall_config)) {
-    console.error("Ошибка: halls или hall_config не существуют или имеют неверный формат");
+  if (
+    !data ||
+    !data.result ||
+    !data.result.halls ||
+    !Array.isArray(data.result.halls[currentZalKonfigIndex].hall_config)
+  ) {
+    console.error(
+      "Ошибка: halls или hall_config не существуют или имеют неверный формат"
+    );
     return;
   }
 
@@ -153,7 +167,10 @@ function pokazatZal(data, currentZalKonfigIndex) {
 
   if (Array.isArray(hall.hall_config)) {
     hall.hall_config.forEach(() => {
-      skhemaZal.insertAdjacentHTML("beforeend", `<div class="hall-config__row"></div>`);
+      skhemaZal.insertAdjacentHTML(
+        "beforeend",
+        `<div class="hall-config__row"></div>`
+      );
     });
   }
 
@@ -184,10 +201,10 @@ function pokazatZal(data, currentZalKonfigIndex) {
 
   // сохраняем конфигурацию зала
   zalyKonfigMassiv = JSON.parse(JSON.stringify(hall.hall_config));
+  newZalKonfigMassiv = JSON.parse(JSON.stringify(zalyKonfigMassiv));
 }
 
 function izmenitMesta(strSkhemaZal, data) {
-  newZalKonfigMassiv = JSON.parse(JSON.stringify(zalyKonfigMassiv));
   const izmenitStroki = Array.from(strSkhemaZal);
 
   izmenitStroki.forEach((row, rowIndex) => {
@@ -196,7 +213,7 @@ function izmenitMesta(strSkhemaZal, data) {
 
       // обработчик клика на месте
       place.addEventListener("click", () => {
-        // переключаем состояние места 
+        // переключаем состояние места
         if (place.classList.contains("seat--standard")) {
           place.classList.replace("seat--standard", "seat--vip");
           place.dataset.type = "vip";
@@ -212,7 +229,9 @@ function izmenitMesta(strSkhemaZal, data) {
         }
 
         // конфигурация зала с новым состоянием
-        const isConfigChanged = JSON.stringify(newZalKonfigMassiv) !== JSON.stringify(data.result.halls[currentZalKonfigIndex].hall_config);
+        const isConfigChanged =
+          JSON.stringify(newZalKonfigMassiv) !==
+          JSON.stringify(data.result.halls[currentZalKonfigIndex].hall_config);
         if (isConfigChanged) {
           cancelZalKonfig.classList.remove("button--disabled");
           saveZalKonfig.classList.remove("button--disabled");
@@ -231,24 +250,34 @@ function izmenitRazmerZala(newZalKonfigMassiv, data) {
     newZalKonfigMassiv.length = 0;
     skhemaZal.innerHTML = "";
 
-    const rowCount = Number(strZalKonfig.value);
+    const rowCount = Math.max(1, Number(strZalKonfig.value));
+    const seatCount = Math.max(1, Number(placesZalKonfig.value));
     for (let i = 0; i < rowCount; i++) {
-      skhemaZal.insertAdjacentHTML("beforeend", `<div class="hall-config__row"></div>`);
+      skhemaZal.insertAdjacentHTML(
+        "beforeend",
+        `<div class="hall-config__row"></div>`
+      );
       newZalKonfigMassiv.push([]);
     }
 
-    const strSkhemaZal = Array.from(document.querySelectorAll(".hall-config__row"));
-    const seatCount = Number(placesZalKonfig.value);
+    const strSkhemaZal = Array.from(
+      document.querySelectorAll(".hall-config__row")
+    );
 
     for (let i = 0; i < rowCount; i++) {
       for (let j = 0; j < seatCount; j++) {
-        strSkhemaZal[i].insertAdjacentHTML("beforeend", `<span class="seat seat--standard" data-type="standart"></span>`);
+        strSkhemaZal[i].insertAdjacentHTML(
+          "beforeend",
+          `<span class="seat seat--standard" data-type="standart"></span>`
+        );
         newZalKonfigMassiv[i].push("standart");
       }
     }
 
     // сравниваем текущую конфигурацию с новой
-    const isConfigChanged = JSON.stringify(newZalKonfigMassiv) !== JSON.stringify(data.result.halls[currentZalKonfigIndex].hall_config);
+    const isConfigChanged =
+      JSON.stringify(newZalKonfigMassiv) !==
+      JSON.stringify(data.result.halls[currentZalKonfigIndex].hall_config);
 
     // активируем или деактивируем кнопки
     cancelZalKonfig.classList.toggle("button--disabled", !isConfigChanged);
@@ -285,7 +314,8 @@ async function sohranitKonfiguraciyu(currentZalKonfig, newZalKonfigMassiv) {
     console.log(data);
 
     alert("Конфигурация зала сохранена!");
-    location.reload();
+    const updatedData = await poluchitDannye(false);
+    if (updatedData) operaciiZalov(updatedData);
   } catch (error) {
     console.error("Ошибка при сохранении конфигурации: ", error);
     alert("Произошла ошибка при сохранении конфигурации.");
@@ -295,14 +325,16 @@ async function sohranitKonfiguraciyu(currentZalKonfig, newZalKonfigMassiv) {
 function pokazatCeny(apiData, currentConfigId) {
   const initPriceControls = () => {
     const controls = {
-      form: document.querySelector('.price-config__form'),
-      inputs: [...document.querySelectorAll('.price-config__input')],
-      cancelBtn: document.querySelector('.price-config__controls .button--cancel'),
-      saveBtn: document.querySelector('.price-config__controls .button--save')
+      form: document.querySelector(".price-config__form"),
+      inputs: [...document.querySelectorAll(".price-config__input")],
+      cancelBtn: document.querySelector(
+        ".price-config__controls .button--cancel"
+      ),
+      saveBtn: document.querySelector(".price-config__controls .button--save"),
     };
 
     if (!controls.form || controls.inputs.length < 2) {
-      console.warn('Элементы управления ценами не найдены');
+      console.warn("Элементы управления ценами не найдены");
       return null;
     }
     return controls;
@@ -310,9 +342,7 @@ function pokazatCeny(apiData, currentConfigId) {
 
   // поиск конфигурации зала
   const findHallConfig = (hallId) => {
-    return apiData?.result?.halls?.find(hall =>
-      hall.id === Number(hallId)
-    );
+    return apiData?.result?.halls?.find((hall) => hall.id === Number(hallId));
   };
 
   // обновление формы цен
@@ -321,19 +351,23 @@ function pokazatCeny(apiData, currentConfigId) {
     formElement.parentNode.replaceChild(newForm, formElement);
     return {
       form: newForm,
-      inputs: newForm.querySelectorAll('.price-config__input')
+      inputs: newForm.querySelectorAll(".price-config__input"),
     };
   };
 
   // настройка обработчика изменений
   const setupChangeHandler = (form, inputs, originalPrices) => {
-    form.addEventListener('input', () => {
+    form.addEventListener("input", () => {
+      inputs.forEach((input) => {
+        const value = Number(input.value);
+        if (value < 0) input.value = 0;
+      });
       const hasChanges =
         inputs[0].value != originalPrices.standart ||
         inputs[1].value != originalPrices.vip;
 
-      controls.cancelBtn?.classList.toggle('button--disabled', !hasChanges);
-      controls.saveBtn?.classList.toggle('button--disabled', !hasChanges);
+      controls.cancelBtn?.classList.toggle("button--disabled", !hasChanges);
+      controls.saveBtn?.classList.toggle("button--disabled", !hasChanges);
     });
   };
 
@@ -345,8 +379,8 @@ function pokazatCeny(apiData, currentConfigId) {
   if (!hallConfig) return;
 
   // цстановка значений цен
-  controls.inputs[0].value = hallConfig.hall_price_standart || '';
-  controls.inputs[1].value = hallConfig.hall_price_vip || '';
+  controls.inputs[0].value = hallConfig.hall_price_standart || "";
+  controls.inputs[1].value = hallConfig.hall_price_vip || "";
 
   // обновление формы
   const { form, inputs } = refreshPriceForm(controls.form);
@@ -359,14 +393,10 @@ function pokazatCeny(apiData, currentConfigId) {
   savePriceKonfig = controls.saveBtn;
 
   // настройка обработчиков
-  setupChangeHandler(
-    form,
-    inputs,
-    {
-      standart: hallConfig.hall_price_standart,
-      vip: hallConfig.hall_price_vip
-    }
-  );
+  setupChangeHandler(form, inputs, {
+    standart: hallConfig.hall_price_standart,
+    vip: hallConfig.hall_price_vip,
+  });
 }
 function createFormData() {
   const formData = new FormData();
@@ -376,11 +406,16 @@ function createFormData() {
 }
 
 function handleResponse(response) {
-  return response.json().then((data) => {
-    console.log(data);
-    alert("Конфигурация цен сохранена!");
-    location.reload();
-  });
+  return response
+    .json()
+    .then((data) => {
+      console.log(data);
+      alert("Конфигурация цен сохранена!");
+    })
+    .then(async () => {
+      const updatedData = await poluchitDannye(false);
+      if (updatedData) operaciiZalov(updatedData);
+    });
 }
 
 function handleError(error) {
@@ -445,7 +480,6 @@ function proveritZalOtkrit(data, tekushayaOpenProdazhu) {
 }
 
 function otkritZakrityZal(tekushayaOpenProdazhu, noviyStatusZal) {
-
   const params = new FormData();
   params.set("hallOpen", `${noviyStatusZal}`);
 
@@ -469,7 +503,69 @@ function otkritZakrityZal(tekushayaOpenProdazhu, noviyStatusZal) {
     });
 }
 
+function reinitializeElement(selector) {
+  const oldElement = document.querySelector(selector);
+  if (oldElement && oldElement.parentNode) {
+    const newElement = oldElement.cloneNode(true);
+    oldElement.parentNode.replaceChild(newElement, oldElement);
+    return newElement;
+  }
+  return oldElement;
+}
+
+function ochistitPeredOtobrazheniem() {
+  zalyList.innerHTML = "";
+  zalyKonfigList.innerHTML = "";
+  priceKonfigList.innerHTML = "";
+  listOpenProdazhu.innerHTML = "";
+  seansyFilmovVremya.innerHTML = "";
+
+  skhemaZal?.replaceChildren();
+
+  reinitializeElement(".hall-config__form");
+  reinitializeElement(".hall-config__rows");
+  reinitializeElement(".hall-config__places");
+  reinitializeElement(".hall-config__controls .button--cancel");
+  reinitializeElement(".hall-config__controls .button--save");
+  reinitializeElement(".price-config__controls .button--cancel");
+  reinitializeElement(".price-config__controls .button--save");
+
+  reinitializeElement(".button--open");
+
+  currentZalKonfig = null;
+  currentZalKonfigIndex = -1;
+  tekushayaCenaKonfiguraciya = null;
+  tekushayaOpenProdazhu = null;
+  noviyStatusZal = 1;
+  tekushiyStatusZal = 0;
+  newZalKonfigMassiv = [];
+
+  zalyKonfigElements = [];
+  priceKonfigElements = [];
+  elementyOpenProdazhu = [];
+  zalyUdalitKnopka = [];
+
+  const hallCancel = document.querySelector(
+    ".hall-config__controls .button--cancel"
+  );
+  const hallSave = document.querySelector(
+    ".hall-config__controls .button--save"
+  );
+  const priceCancel = document.querySelector(
+    ".price-config__controls .button--cancel"
+  );
+  const priceSave = document.querySelector(
+    ".price-config__controls .button--save"
+  );
+
+  hallCancel?.classList.add("button--disabled");
+  hallSave?.classList.add("button--disabled");
+  priceCancel?.classList.add("button--disabled");
+  priceSave?.classList.add("button--disabled");
+}
+
 function operaciiZalov(data) {
+  ochistitPeredOtobrazheniem();
   // получение формы конфигурации зала
   formaZalKonfig = document.querySelector(".hall-config__form");
 
@@ -478,16 +574,11 @@ function operaciiZalov(data) {
     ".hall-config__places",
     ".hall-config__seats",
     ".hall-config__controls .button--cancel",
-    ".hall-config__controls .button--save"
+    ".hall-config__controls .button--save",
   ];
 
-  const [
-    rowsElem,
-    placesElem,
-    seatsElem,
-    cancelBtn,
-    saveBtn
-  ] = configSelectors.map((selector) => document.querySelector(selector));
+  const [rowsElem, placesElem, seatsElem, cancelBtn, saveBtn] =
+    configSelectors.map((selector) => document.querySelector(selector));
 
   if (rowsElem && placesElem && seatsElem) {
     strZalKonfig = rowsElem;
@@ -534,7 +625,7 @@ function operaciiZalov(data) {
       );
     }
 
-    // наличия контейнера для конфигурации цен 
+    // наличия контейнера для конфигурации цен
     if (priceKonfigList) {
       const { id, hall_name } = data.result.halls[i];
       priceKonfigList.insertAdjacentHTML(
@@ -567,8 +658,10 @@ function operaciiZalov(data) {
       `
     );
 
-    const udaleniyaVremya = document.querySelectorAll(".session-timeline__delete");
-    udaleniyaVremya.forEach(element => element.classList.add("hidden"));
+    const udaleniyaVremya = document.querySelectorAll(
+      ".session-timeline__delete"
+    );
+    udaleniyaVremya.forEach((element) => element.classList.add("hidden"));
   }
 
   // проверка наличия элементов в zalyKonfigList и первого дочернего элемента
@@ -582,7 +675,7 @@ function operaciiZalov(data) {
 
     // находим индекс текущего зала в массиве halls
     currentZalKonfigIndex = data.result.halls.findIndex(
-      hall => hall.id === Number(currentZalKonfig)
+      (hall) => hall.id === Number(currentZalKonfig)
     );
 
     if (currentZalKonfigIndex !== -1) {
@@ -601,11 +694,10 @@ function operaciiZalov(data) {
   if (cancelZalKonfig) {
     // обработчик клика на кнопку отмены
     cancelZalKonfig.addEventListener("click", (event) => {
+      event.preventDefault();
       if (cancelZalKonfig.classList.contains("button--disabled")) {
-        event.preventDefault();
         return;
       }
-      event.preventDefault();
       cancelZalKonfig.classList.add("button--disabled");
       saveZalKonfig.classList.add("button--disabled");
 
@@ -614,16 +706,13 @@ function operaciiZalov(data) {
     });
   }
 
-  // проверка существования элемента saveZalKonfig 
+  // проверка существования элемента saveZalKonfig
   if (saveZalKonfig) {
     saveZalKonfig.addEventListener("click", (event) => {
+      event.preventDefault();
       if (saveZalKonfig.classList.contains("button--disabled")) {
-        event.preventDefault();
         return;
       }
-
-      // если активна -> вызываем функцию сохранения конфигурации
-      event.preventDefault();
       sohranitKonfiguraciyu(currentZalKonfig, newZalKonfigMassiv);
     });
   }
@@ -645,12 +734,11 @@ function operaciiZalov(data) {
   const cancelButton = otmenaCenaKonfiguraciya;
   if (cancelButton) {
     cancelButton.addEventListener("click", (event) => {
+      event.preventDefault();
       if (cancelButton.classList.contains("button--disabled")) {
-        event.preventDefault();
         return;
       }
 
-      event.preventDefault();
       cancelButton.classList.add("button--disabled");
       savePriceKonfig.classList.add("button--disabled");
 
@@ -663,8 +751,8 @@ function operaciiZalov(data) {
   const saveButton = savePriceKonfig;
   if (saveButton) {
     saveButton.addEventListener("click", (event) => {
+      event.preventDefault();
       if (saveButton.classList.contains("button--disabled")) {
-        event.preventDefault();
         return;
       }
       sohranitCeny(tekushayaCenaKonfiguraciya);
@@ -685,7 +773,9 @@ function operaciiZalov(data) {
 
   zalyKonfigElements.forEach((item) => {
     item.addEventListener("click", () => {
-      zalyKonfigElements.forEach((i) => i.classList.remove("hall_item-selected"));
+      zalyKonfigElements.forEach((i) =>
+        i.classList.remove("hall_item-selected")
+      );
 
       item.classList.add("hall_item-selected");
 
@@ -715,12 +805,11 @@ function operaciiZalov(data) {
     });
   });
 
-
   priceKonfigElements = document.querySelectorAll(".price-config__item");
   const setupPriceConfigSelection = () => {
     if (!priceKonfigElements || !priceKonfigElements.length) return;
     const handlePriceItemClick = (clickedItem) => {
-      priceKonfigElements.forEach(el =>
+      priceKonfigElements.forEach((el) =>
         el.classList.remove("hall_item-selected")
       );
 
@@ -737,11 +826,12 @@ function operaciiZalov(data) {
       pokazatCeny(data, tekushayaCenaKonfiguraciya);
     };
 
-    priceKonfigElements.forEach(item => {
+    priceKonfigElements.forEach((item) => {
       item.addEventListener("click", () => handlePriceItemClick(item));
 
       item.onpointerdown = (e) => {
-        if (e.button === 0) { // Проверяем левую кнопку мыши
+        if (e.button === 0) {
+          // Проверяем левую кнопку мыши
           handlePriceItemClick(item);
         }
       };
@@ -750,7 +840,8 @@ function operaciiZalov(data) {
 
   // инициализация при загрузке
   const initPriceConfig = () => {
-    priceKonfigElements = document.querySelectorAll(".price-config__item") || [];
+    priceKonfigElements =
+      document.querySelectorAll(".price-config__item") || [];
     setupPriceConfigSelection();
 
     if (priceKonfigElements[0]) {
@@ -777,7 +868,6 @@ function operaciiZalov(data) {
       proveritZalOtkrit(data, tekushayaOpenProdazhu);
     });
   });
-
 
   if (knopkaOpenProdazhu) {
     knopkaOpenProdazhu.addEventListener("click", (event) => {
@@ -807,16 +897,25 @@ function operaciiZalov(data) {
     });
   }
 
-
   // получаем все кнопки удаления залов
   zalyUdalitKnopka = document.querySelectorAll(".hall_remove");
 
   zalyUdalitKnopka.forEach((item) => {
     item.addEventListener("click", (e) => {
-
       let hallId = e.target.previousElementSibling.dataset.id;
 
       udalitZal(hallId);
     });
-  })
+  });
+
+  [strZalKonfig, placesZalKonfig].forEach((input) => {
+    input.addEventListener("input", () => {
+      if (Number(input.value) < 0) {
+        input.value = 1;
+      }
+      if (Number(input.value) > 10) {
+        input.value = 10;
+      }
+    });
+  });
 }
